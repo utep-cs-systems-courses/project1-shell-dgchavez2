@@ -7,7 +7,15 @@ import sys
 
 def pyshell():
 	while True:
-		cmd = input("$ ")
+		if 'PS1' in os.environ:
+			os.write(1, os.environ['PS1'].encode())
+		else:
+			os.write(1, ("$ ").encode())
+		try:
+			cmd = input()
+		except EOFError:
+			sys.exit(1)
+
 		if cmd == "exit":
 			break
 
