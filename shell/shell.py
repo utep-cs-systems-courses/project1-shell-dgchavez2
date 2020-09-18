@@ -21,7 +21,12 @@ def pyshell():
 
 		#checks if the first three chars are "cd " to initiate change directory 
 		elif cmd[:3] == "cd ":
-			pysh_cd(cmd[3:])
+			ex = cmd.split()
+			pysh_cd(ex[1])
+			if len(ex) > 2:
+				for i in range(len(ex),2):
+					print(ex[i])
+					cmd_execute(ex[i])
 		elif (cmd.find(">") != -1):
 			redirect_cmd(cmd)
 		else:
@@ -29,9 +34,9 @@ def pyshell():
 
 
 #change directory function
-def pysh_cd(path):
+def pysh_cd(cmd):
 	try:
-		os.chdir(os.path.abspath(path))
+		os.chdir(cmd)
 	except Exception:
 		os.write(2, "cd: no such file or directory".encode())
 
