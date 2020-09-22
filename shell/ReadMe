@@ -1,0 +1,6 @@
+Welcome to my shell. 
+In my shell, I was able to accomplish some of the goals set out by Instructor Freudenthal and Pruitt. Unfortunately not every goal was met. 
+Firstly, I would like to say that although my shell can execute some of the commands/processes required by the assignment,
+only the cd and dir commands were recognized by the tester. This assignment was challenging, but it helped me understand the importance of os processes.
+
+To run my script, simply type ./shell.py and you can start inputting commands to my shell. To exit: Ctrl + D. 
