@@ -15,21 +15,23 @@ def pyshell():
 			cmd = input()
 		except EOFError:
 			sys.exit(1)
+		cmd = cmd.strip()
 
 		if cmd == "exit":
 			break
 
 		#checks if the first three chars are "cd " to initiate change directory 
-		elif cmd[:3] == "cd ":
+		elif "cd" in cmd:
 			ex = cmd.split()
 			pysh_cd(ex[1])
 			if len(ex) > 2:
 				for i in range(len(ex),2):
 					print(ex[i])
 					cmd_execute(ex[i])
-		elif (cmd.find(">") != -1):
+		elif ">" in cmd:
 			redirect_cmd(cmd)
 		else:
+			cmd = cmd.split(" ", 1)
 			cmd_execute(cmd)
 
 
@@ -43,15 +45,15 @@ def pysh_cd(cmd):
 def redirect_cmd(cmd):
 	rc = os.fork()
 
-	if rc < 0:		
+	if rc < 0:		#failed fork
 		sys.exit(1)
 
 	elif rc == 0:
 		args = [cmd.strip().split()[0]]
 
 		os.close(1)
-		sys.stdout = open(cmd.strip().split()[2], "w")
-		os.set_inheritable(1, True)
+		sys.stdout = open(cmd.strip().split()[2], "w")  #opens file to write to
+		os.set_inheritable(1, True)			#sets inheritability of stdout to true
 
 		for dir in re.split(":", os.environ['PATH']):
 			program = "%s/%s" % (dir, args[0])
@@ -74,38 +76,18 @@ def cmd_execute(cmd):
 		sys.exit(1)
 
 	elif rc == 0:
-		if "|" in cmd:
-			stdin, stdout = (0,0)
-			stdin = os.dup(0)
-			stdout = os.dup(1)
-			
-			fileIn= os.dup(stdout)
-			
-			for command in cmd.split("|"):
-				os.dup2(fileIn, 0)
-				os.close(fileIn)
-				
-				if command == cmd.split("|")[-1]:
-					fileOut = os.dup(stdout)
-				else:
-					fileIn, fileOut = os.pipe()
-
-				os.dup2(fileOut, 1)
-				os.close(fileOut)
-
-				try:
-					print("piped")
-				except Exception:
-					pass
-		else:
-			args = [cmd.strip().split()[0]]
+		if cmd != "":
+			try:
+				os.execve(cmd[0], cmd, os.environ)
+			except FileNotFoundError:
+				pass
 			for dir in re.split(":", os.environ['PATH']):
-				program = "%s/%s" % (dir, args[0])
+				program = "%s/%s" % (dir, cmd[0])
 				try:
-					os.execve(program, args, os.environ)
+					os.execve(program, cmd, os.environ)
 				except FileNotFoundError:
 					pass
-			os.write(2, ("%s: command not found\n" %args[0]).encode())
+			print(cmd[0] + ": command not found.")
 			sys.exit(1)
 	else:
 		os.wait()
